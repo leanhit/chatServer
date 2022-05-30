@@ -1,0 +1,183 @@
+
+/*------------2. sidebar---------------*/
+#divSidebar{
+    display: none;
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    height: 100%;
+    width: 24%;
+    background-color: paleturquoise;  
+  }
+  
+  /*-----------1.1 sidebar top--------------*/
+  #divSidebarTop{
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    height: 15%;
+    width: 24%;
+  }
+  
+  #tblSidebarTop{
+    width: 100%;
+    background-color: rgb(166, 209, 250);
+  }
+  
+  #td01{
+    width: 18px;
+  }
+  
+  #divSidebarMyAvatar{
+    display: block;
+    float: left;
+    
+    margin: auto;
+    background: white;
+    
+    border:2px solid white;
+    width:34px;
+    height:34px;
+    border-top-left-radius: 18px;
+    border-top-right-radius: 18px;
+    border-bottom-left-radius: 18px;
+    border-bottom-right-radius: 18px;
+  }
+  
+  #imgSidebarMyAvatar{
+    width: 36px;
+    height: 36px;
+    
+    border-top-left-radius: 18px;
+    border-top-right-radius: 18px;
+    border-bottom-left-radius: 18px;
+    border-bottom-right-radius: 18px;
+  }
+  
+  #aSidebarMyName  {  
+    float: left;
+    color: black;
+    text-align: center;
+    text-decoration: none;
+    font-size: 17px;
+  }
+  
+  #aSidebarMenu{
+    float: right;
+    color: black;
+    text-align: right;
+    text-decoration: none;
+    font-size: 17px;
+  }
+  
+  #inSidebarFind{
+    width: 98%;
+    height: 20px;
+  }
+
+  /*--------2.2 sidebar table lischat-----------*/
+  #ulChatlistView{
+    position: absolute;
+    padding-left: 0;
+    top: 21%;
+    width: 100%;
+    height: 80%;
+
+    overflow-y: scroll;
+  }
+  
+  /*-----------sidebar menu-----------*/
+  #divSidebarSingleAlert{
+    display: none;
+    position: absolute;
+    width: 200px;
+    height: 50px;
+    top: 3%;
+    right: 0;
+    /*background-color: rgb(238, 82, 71);*/
+    opacity: 0.5;
+    filter: alpha(opacity=50);
+  
+  }
+
+  #aSidebarSingleAlert {
+    margin: 0 auto;
+    font-size: 20px;
+    color: rgb(253, 4, 4);
+  }
+
+  #divSidebarMenu{
+    display: none;
+    position: absolute;
+    width: 150px;
+    height: 75px;
+    top: 5%;
+    right: 0;
+    background-color: rgb(153, 176, 245);
+  
+  }
+
+  #divSidebarMenu > table{
+    text-align: right;
+    width: 100%;
+  }
+  /*---------end sidebar--------------*/
+  
+ 
+
+/*----------create new group chat--------------*/
+  
+#divCreateNewGroup{
+  display: none;
+    position: absolute;
+    top: 10%;
+    left: 40%;
+    
+    background-color: turquoise;
+    width: 350px;
+    height: 450px;
+    z-index: 9;
+}
+
+#btnCloseCreateNewGroup {
+  padding-top: 0;
+  top: 0;
+  left: 0;
+  font-size: 35px;
+}
+
+#aNewGroup{
+  margin-top: 10px;
+  margin-right: 60px;
+  float: right;
+  color: black;
+  text-align: right;
+  text-decoration: none;
+  font-size: 25px;
+}
+
+#inputGroupName{
+  margin-top: 5px;
+  margin-left: 50px;
+  font-size: 20px;
+}
+
+#ulChoiceFriend{
+  position: relative;
+  padding: 0;
+  width: 350px;
+  height: 330px;
+  top: 5px;
+  overflow: scroll;
+  margin: auto;
+}
+
+#btnCreateNewGroup{
+  margin-top: 10px;
+  margin-left: 140px;
+  
+  font-size: 20px;
+  background-color: rgb(106, 106, 238);
+}
+
+/*-------end find user--------*/

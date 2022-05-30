@@ -1,0 +1,101 @@
+.popupChat{
+    width: 250px; 
+    height: 400px; 
+    position: absolute; 
+    right: 50px;
+    bottom: 0px;
+    background-color: aqua;
+
+    
+    border: solid rebeccapurple 0.1rem; 
+    flex-grow: 1; 
+    border-radius: 0.2rem; 
+}
+
+#inAdminUsername{
+    width: 40%;
+    height: 30px;
+    
+    border: solid rebeccapurple 0.1rem; 
+    flex-grow: 1; 
+    border-radius: 2rem; 
+    margin: 0.25rem;
+
+    text-align: center;
+    font-size: 20px;
+    color: blue;
+}
+/*-------------------div mess show----------------------*/
+
+#divSendMessage {
+    width: 100%; 
+    background: rgba(0, 0, 0, 0.15); 
+    padding: 0.25rem; 
+    
+    bottom: 0; 
+    right: 50px; 
+    display: flex; 
+    height: 3rem; 
+    box-sizing: border-box; 
+    backdrop-filter: blur(10px); 
+
+    background-color: black;
+}
+
+#inputMessage { 
+    border: none; 
+    padding: 0.1rem; 
+    flex-grow: 1; 
+    border-radius: 0.2rem; 
+    margin: 0.25rem;
+    width: 50%;
+    overflow-x: auto;
+}
+
+#inputMessage:focus {
+     outline: none;
+}
+
+#divSendMessage > button {
+    background: #333; 
+    border: none; 
+    padding: 0 1rem; 
+    margin: 0.25rem; 
+    border-radius: 3px; 
+    outline: none; 
+    color: #fff; 
+    
+}
+
+
+
+#divMessShow{
+    border: solid red 1px;
+}
+
+#messages { 
+    list-style-type: none;
+    width: 98%;
+    height: 300px;
+    overflow-y: scroll;
+    padding: 1px;
+}
+
+#messages > li { padding: 0.5rem 1rem; }
+#messages > li:nth-child(odd) { background: #efefef; }
+
+/* Hide input field, we want to use our button or w/e */
+#fileSelector {
+height: 0;
+width: 0;
+visibility: hidden;
+overflow: hidden;
+position: absolute;
+}
+
+
+#btnChoiceImg {
+display: block;
+opacity: 1;
+}/*------------------------------------*/
+

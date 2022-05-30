@@ -1,0 +1,192 @@
+/*-------3 start page----------------*/
+
+#divStartPage {
+    display: none;
+   /* position: absolute;*/
+    max-width: 500px;
+    margin: auto;
+    margin-top: 50px;
+    margin-right: 20%;
+    background: white;
+    padding: 10px;
+  }
+  
+  /*----------3.1 hi div-------------*/
+  #divHiDivMyAvatar{
+    display: block;
+    margin: auto;
+    background: white;
+    
+    border:2px solid black;
+    width:120px;
+    height:120px;
+    border-top-left-radius: 60px;
+    border-top-right-radius: 60px;
+    border-bottom-left-radius: 60px;
+    border-bottom-right-radius: 60px;
+  }
+  
+  #imgHiDivAvatar{
+    width: 120px;
+    height: 120px;
+    
+    border-top-left-radius: 60px;
+    border-top-right-radius: 60px;
+    border-bottom-left-radius: 60px;
+    border-bottom-right-radius: 60px;
+  }
+  
+  #sayHiUser{
+    text-align:center;
+  }
+  
+  .alertPopup {
+    display: none;
+    position: fixed;
+    top: 145px;
+    margin-top: 5px;
+    right: 24%;
+    border: 0px solid #f1f1f1;
+    z-index: 9;
+  }
+  
+  /*--------------3.2. Start chat div----------------*/
+  
+  #divStartChat {
+    display: block;  
+    margin: auto;
+    margin-top: 20px;
+  
+    background: rgb(17, 17, 17);
+    
+    border:2px solid black;
+    
+    width:250px;
+    height:40px;
+    
+    border-top-left-radius: 60px;
+    border-top-right-radius: 60px;
+    border-bottom-left-radius: 60px;
+    border-bottom-right-radius: 60px;
+  }
+  
+  #btnStartChat{
+    background-color: rgb(17, 17, 17);
+    border: none;
+    margin-left: 17px;
+    width: 210px;
+    height: 36px;
+    font-size: 18px;
+    color: white;
+  }
+  
+  /*----------3.3 div alert content----------*/
+  
+  #divAlertConent {
+    display: block;
+    margin: auto;
+    margin-top: 30px;
+  
+    
+    border: tomato;
+  
+  }
+  
+  /*-------end start page----------------*/
+  
+  /*---------------------------------------------*/
+  
+  /*----------3. find user--------------*/
+  
+  #divFindUser {
+    display: none;
+    position: absolute;
+    top: 10%;
+    left: 40%;
+    
+    background-color: turquoise;
+    width: 350px;
+    height: 450px;
+    z-index: 9;
+  }
+  
+  #btnCloseFindNewUser {
+    top: 0;
+    font-size: 35px;
+  }
+  
+  #aFindNewUser{
+    margin-right: 80px;
+    float: right;
+    color: black;
+    text-align: right;
+    text-decoration: none;
+    font-size: 25px;
+  }
+  
+  #inputFindNewUser{
+    top: 0;
+    margin: auto;
+    width: 80%;
+    font-size: 20px;
+  
+  }
+
+  #btnFindNewUser{
+    top: 0;
+    right: 0;
+    width: 15%;
+    font-size: 20px;
+    background-color: rgb(106, 106, 238);
+  }
+
+  #ulFindUserResult{
+    margin: auto;
+  }
+  /*-------end find user--------*/
+  
+  
+#popupChangeAvatar {
+    display: none;
+    position: fixed;
+    top: 145px;
+    right: 24%;
+    border: 0px solid #f1f1f1;
+    z-index: 9;
+  }
+  
+#popupFindUser {
+    display: none;
+    position: fixed;
+    top: 280px;
+    right: 20%;
+    border: 0px solid #f1f1f1;
+    z-index: 9;
+  }
+
+  
+#divLoginForm{
+    display: none;
+    position: absolute;
+    background-color: rgb(185, 238, 238);
+    top: 20%;
+    left: 40%;
+    width: 270px;
+    height: 120px;
+  }
+
+  #newAvatarSelector {
+    height: 0;
+    width: 0;
+    visibility: hidden;
+    overflow: hidden;
+    position: absolute;
+  }
+
+  #imgSelector {
+    height: 0;
+    width: 0;
+    visibility: hidden;
+    overflow: hidden;
+    position: absolute;
+  }

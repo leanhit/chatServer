@@ -1,0 +1,36 @@
+{
+  "name": "chatzalo.vn",
+  "version": "1.2.5",
+  "private": true,
+  "scripts": {
+    "start": "nodemon ./bin/www"
+  },
+  "dependencies": {
+    "atob": "^2.1.2",
+    "bcrypt": "^5.0.1",
+    "cors": "^2.8.5",
+    "debug": "~2.6.9",
+    "ejs": "^3.1.8",
+    "express": "~4.16.1",
+    "fs": "0.0.1-security",
+    "http-errors": "~1.6.3",
+    "jsonwebtoken": "^8.5.1",
+    "mongodb": "^4.3.0",
+    "morgan": "~1.9.1",
+    "mssql": "^7.1.1",
+    "nodemon": "^2.0.14",
+    "simple-peer": "^9.11.0",
+    "socket.io": "^4.4.1"
+  },
+  "description": "chat realtime application",
+  "main": "app.js",
+  "repository": {
+    "type": "git",
+    "url": "http://www.chatzalo.vn:8888"
+  },
+  "keywords": [
+    "thí version update relationship betwen user-user. add singler arlet, exam people online, offline, addfirnd request, send new message..."
+  ],
+  "author": "Le The Anh",
+  "license": "ISC"
+}

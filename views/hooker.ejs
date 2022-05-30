@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>
+    <%= title %>
+  </title>
+  <link rel='stylesheet' href='/stylesheets/hooker.css' />
+  <script src="http://code.jquery.com/jquery.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js">  </script>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/javascripts/client/libFunction.js">    </script>
+  <script src="/javascripts/client/hooker.js">    </script>
+
+</head>
+
+<body>
+
+
+  <div class="continer">
+    <div class="popupChat">
+      <div class="pcHeader">
+        <label>Contact with: </label>
+        <input type="text" id="inAdminUsername"  disabled>
+      </div>
+      <div id="divMessShow">
+        <ul id="messages"></ul>
+      </div>
+      <div id="divSendMessage">
+        <input id="inputMessage" onkeypress="enterPress(event)" autocomplete="off" autofocus >
+
+        <input id="fileSelector" type="file" accept=".jpg, .jpeg, .png" onchange="previewFiles()">
+        <div id="preview"></div>
+        <button id="btnChoiceImg" type="button" onclick="choiceImg()">+</button>
+
+        <input type="submit" onclick="sendMessage()" value="Send"></input>
+      </div>
+
+
+    </div>
+  </div>
+</body>
+
+</html>

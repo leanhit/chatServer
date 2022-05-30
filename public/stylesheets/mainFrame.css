@@ -1,0 +1,154 @@
+#divMain{
+  display: none;
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 76%;
+  height: 100%;
+  background-color: cornsilk;
+}
+
+/*-----------1.topbar--------------*/
+#divTopBar{
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  width: 100%;
+  height: 12%;
+  overflow: hidden;
+  background-color: rgb(219, 221, 213);
+}
+
+/*-----------1.1 topbar left--------------*/
+#divTopbarLeft{
+  margin-top: 5px;
+  margin-left: 10px;
+}
+
+#divTopbarChatterName  {  
+  display: block;
+  float: left;
+  margin-left: 5%;
+  height: 7%;
+  overflow: hidden;
+}
+
+#aTopbarChaterName  {  
+  float: right;
+  display: block;
+  margin-top: 10px;
+  color: #140606;
+  text-align: center;
+  text-decoration: none;
+  font-size: 25px;
+  font-weight: bold;
+}
+
+
+
+/*-----------------*/
+#divTopbarRight{
+  float: right;
+  margin-top: 2%;
+  margin-right: 2%;
+}divTopbarRight
+
+#divTopbarRight > a{
+  font-size: 20px;
+}
+/*--------end topbar-------------*/
+
+/*-------------------div mess show----------------------*/
+
+#divSendMessage {width: 76%; background: rgba(0, 0, 0, 0.15); padding: 0.25rem; position: fixed; bottom: 0; right: 0; display: flex; height: 3rem; box-sizing: border-box; backdrop-filter: blur(10px); }
+#inputMessage { border: none; padding: 0 1rem; flex-grow: 1; border-radius: 2rem; margin: 0.25rem;}
+#inputMessage:focus { outline: none; }
+#divSendMessage > button { background: #333; border: none; padding: 0 1rem; margin: 0.25rem; border-radius: 3px; outline: none; color: #fff; }
+
+#messages { 
+list-style-type: none;
+position: fixed;
+width: 76%;
+top: 10%;
+bottom: 6%;
+right: 0;
+padding: 0; 
+overflow: scroll;  
+}
+
+#messages > li { padding: 0.5rem 1rem; }
+#messages > li:nth-child(odd) { background: #efefef; }
+
+/* Hide input field, we want to use our button or w/e */
+#fileSelector {
+height: 0;
+width: 0;
+visibility: hidden;
+overflow: hidden;
+position: absolute;
+}
+
+
+#btnChoiceImg {
+display: block;
+opacity: 1;
+}/*------------------------------------*/
+
+
+/*----------create new group chat--------------*/
+  
+#divEditGroup{
+  display: none;
+    position: absolute;
+    top: 10%;
+    left: 40%;
+    
+    background-color: turquoise;
+    width: 350px;
+    height: 450px;
+    z-index: 9;
+}
+
+#btnCloseEditGroup {
+  padding-top: 0;
+  top: 0;
+  left: 0;
+  font-size: 35px;
+}
+
+#aEditGroup{
+  margin-top: 10px;
+  margin-right: 100px;
+  float: right;
+  color: black;
+  text-align: right;
+  text-decoration: none;
+  font-size: 25px;
+}
+
+#inputNewGroupName{
+  margin-top: 5px;
+  margin-left: 50px;
+  font-size: 16px;
+}
+
+#ulSelectFriend{
+  position: relative;
+  padding: 0;
+  width: 350px;
+  height: 340px;
+  top: 5px;
+  overflow: scroll;
+  margin: auto;
+}
+
+/* video call 
+#imgTopbarVideoCall{
+  height: 5px;
+  width: 5px;
+
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+  border-bottom-left-radius: 3px;
+  border-bottom-right-radius: 3px;
+}*/

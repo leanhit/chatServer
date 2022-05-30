@@ -1,0 +1,74 @@
+
+#divVideoCall{
+  display: none;
+  position: absolute;
+  background-color: rgb(247, 92, 92);
+  
+  width: 100%;
+  height: 100%;
+  top: 0px;
+}
+
+#divLocalVideo{
+  position: absolute;
+  width: 35%;
+  height: 55%;
+  background-color: rgb(166, 255, 0);
+}
+
+#divLocalVideoControl{
+  position: absolute;
+  width: 50%;
+  bottom: 1px;
+}
+#localVideo {
+  background-color: blue;
+  position: absolute;
+  
+  width: 100%;
+
+  top: 0px;
+  left: 0px;
+}
+
+/* ----------------------remotevideo ----------------------------*/
+#divRemoteVideoControl{
+  position: absolute;
+  display: block;
+  width: 35%;
+  height: 55%;
+  background-color: rgb(0, 153, 255);
+  right: 1px;
+  bottom: 1px;
+}
+
+#divCallFeedbackControl{
+  position: absolute;
+  display: none;
+  width: 50%;
+  bottom: 1px;
+}
+
+#divRemoteVideo{
+  position: absolute;
+  display: none;
+  width: 100%;
+  bottom: 1px;
+}
+
+#remoteVideo {
+  background-color: blue;
+  height: 100%;
+  width: 100%;
+}
+
+/*-----------------call alert-------------------*/
+#divCallFeedbackControl{
+  display: none;
+    position: absolute;
+    background-color: rgb(172, 238, 238);
+    top: 20%;
+    left: 40%;
+    width: 200px;
+    height: 120px;
+}

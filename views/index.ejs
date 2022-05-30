@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>
+    <%= title %>
+  </title>
+  <link rel='stylesheet' href='/stylesheets/mainFrame.css' />
+  <link rel='stylesheet' href='/stylesheets/sidebarFrame.css' />
+  <link rel='stylesheet' href='/stylesheets/startFrame.css' />
+  <link rel='stylesheet' href='/stylesheets/videoCall.css' />
+  <script src="http://code.jquery.com/jquery.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+
+  <script src="/simple-peer/simple-peer.min.js">    </script>
+  <script src="/javascripts/client/cookie.js">    </script>
+  <script src="/javascripts/client/login.js">    </script>
+  <script src="/javascripts/client/libFunction.js">    </script>
+  <script src="/javascripts/client/sidebarFrame.js">    </script>
+
+  <script src="/javascripts/client/mainFrame.js">    </script>
+
+  <script src="/javascripts/client/startFrame.js">    </script>
+  <!--
+    
+    <script src="/javascripts/client/videoCall.js">    </script>
+    -->
+</head>
+
+<body>
+
+
+  <div id="divLoginForm">
+    <form id="loginForm" action="javascript:void(0);">
+      <table>
+        <tr>
+          <th><label for="uname"><b>Username</b></label>
+          <th><input id="txtUName" type="text" placeholder="User name" required autofocus></th>
+        </tr>
+        <tr>
+          <th><label for="psw"><b>Password</b></label></th>
+          <th><input id="pswPass" type="password" placeholder="Enter Password" required></th>
+        </tr>
+        <tr>
+          <th colspan="2"><label>
+              <input type="checkbox" checked="checked" name="remember"> Remember me
+            </label>
+            <button onclick="btnLogin()">Login
+          </th>
+        </tr>
+        <tr>
+          <th colspan="2"><a href="http://ketnoicongdong.net/members/dang-ky">Click here to registry</a></th>
+        </tr>
+      </table>
+    </form>
+  </div>
+
+  <div id="divCallFeedbackControl">
+    <a id="aWhoCalling">
+      <h4>Who's calling</h4>
+    </a>
+    <br><br>
+
+    <button onclick="callAccept()">Accept</button>
+    <button onclick="callCancel()">Cancel</button>
+    <button onclick="callIgnore()">Ignore</button><br>
+  </div>
+
+  <div id="divStartPage">
+
+
+    <!-- startFrame -->
+
+
+
+    <h1 id="sayHiUser">Wellcome XYZ</h1>
+
+    <div id="divHiDivMyAvatar">
+      <img id="imgHiDivAvatar" onclick="ChangeAvatar()" onmouseover="showAlertChangeAvatar()"
+        src="http://blog.uhm.vn/emo/onionto/1.gif">
+
+    </div>
+
+    <div id="divStartChat">
+      <button id="btnStartChat" onclick="startChat()" onmouseover="showAlertFindUser()">Start new converation</button>
+    </div>
+
+    <div id="divAlertConent">
+      <ul id="ulAlertShow">
+
+      </ul>
+    </div>
+
+    <div id="popupChangeAvatar">
+      <h5>Click to change avatar</h5>
+    </div>
+
+    <div id="popupFindUser">
+      <h5>Click to find other</h5>
+    </div>
+
+    <div id="divFindUser">
+      <a id="btnCloseFindNewUser" onclick="closeNav()">&times;</a>
+      <a id="aFindNewUser">Find new user</a> <br>
+      <input id="inputFindNewUser" onkeypress="enterUsername(event)" placeholder="Enter nickname" autofocus>
+      <button id="btnFindNewUser" onclick="findNewUser()">Find</button>
+      <ul id="ulFindUserResult"></ul>
+    </div>
+
+  </div>
+
+  <!-- sidebar frame-->
+  <div id="divSidebar">
+    <div id="divSidebarTop">
+      <table id="tblSidebarTop">
+        <tr style="height: 45px;">
+          <td id="td01">
+            <div id="divSidebarMyAvatar">
+              <img id="imgSidebarMyAvatar" src="http://blog.uhm.vn/emo/onionto/1.gif">
+            </div>
+          </td>
+          <td><a id="aSidebarMyName" href="/"> myName</a></td>
+          <td></td>
+          <td><a id="aSidebarMenu" onclick="sidebarShowMenu()">&#9776;</a></td>
+        </tr>
+        <tr>
+          <td colspan="4">
+            <input id="inSidebarFind" type="text" placeholder=" ®©Find frend" onkeyup="enterCharPress(event)">
+          </td>
+        </tr>
+        <tr style="height: 30px;">
+          <td></td>
+          <td style="text-align:right;" onclick="showGuestList()">Guest</td>
+          <td style="text-align:right;" onclick="showChatList()">Chat</td>
+          <td style="text-align:right;" onclick="showAlert()">Alert</td>
+        </tr>
+        <tr style="height: 20px;">
+          <td colspan="2">
+            <select style="height: 15px; font-size: 10px;" id="selectOrderChatList" onchange="selectOrder(this)">
+              <option value="chatTime">Order by chat time</option>
+            </select>
+          </td>
+          <td colspan="2" style="text-align:right;" onclick="createNewChat()">Group</td>
+        </tr>
+      </table>
+    </div>
+
+
+
+
+    <ul id="ulChatlistView"></ul>
+
+    <div id="divSidebarMenu" onmouseup="sidebarHideMenu()">
+      <table id="tblSidebarMenu">
+        <tr>
+          <td><a href="/" onclick="logoutClick()">Logout</a></td>
+        </tr>
+        <tr>
+          <td><a>update info</a></td>
+        </tr>
+        <tr>
+          <td><a>About us</a></td>
+        </tr>
+      </table>
+    </div>
+
+
+    <div id="divSidebarSingleAlert" onclick="sidebarOpenAlert()">
+      <a id="aSidebarSingleAlert">alert show here</a>
+    </div>
+  </div>
+
+  <!-- mainframe-->
+  <div id="divMain">
+    <div id="divTopBar">
+      <div id="divTopbarRight">
+        <a id="imgTopbarVideoCall" onclick="startPeerConnect()">Call</a>
+        <a id="aTopbarReadMoreMess" onclick="readMoreMess()">&#8853;</a>
+        <a id="aTopbarDellChater" href="/" onclick="delMess()">&#8855;</a>
+
+      </div>
+
+      <div id="divTopbarLeft">
+        <div id="divTopbarChatterName">
+          <a id="aTopbarChaterName">FriendName</a>
+        </div>
+      </div>
+    </div>
+
+    <form id="messShow">
+      <ul id="messages"></ul>
+    </form>
+
+    <div id="divSendMessage">
+      <input id="inputMessage" onkeypress="enterPress(event)" autocomplete="off" autofocus />
+
+      <input id="fileSelector" type="file" accept=".jpg, .jpeg, .png" onchange="previewFiles()" multiple />
+      <div id="preview"></div>
+      <button id="btnChoiceImg" type="button" onclick="choiceImg()">+</button>
+
+      <input type="submit" onclick="sendMessage()" value="Send"></input>
+    </div>
+
+
+  </div>
+
+  <div id="divCreateNewGroup">
+    <a id="btnCloseCreateNewGroup" onclick="CloseCreateNewGroup()">&times;</a>
+    <a id="aNewGroup">Create new group chat</a>
+    <input id="inputGroupName" placeholder="Enter group name">
+
+    <ul id="ulChoiceFriend"></ul>
+    <button id="btnCreateNewGroup" onclick="createNewGroup()">Create</button>
+  </div>
+
+  <div id="divEditGroup">
+    <a id="btnCloseEditGroup" onclick="CloseEditGroup()">&times;</a>
+    <a id="aEditGroup">Edit group chat</a>
+    <input id="inputNewGroupName" onkeypress="enterNewGroupName(event)" placeholder="Enter new group name" autofocus>
+    <button onclick="changeGroupName()">Change</button><br><br>
+
+    <button onclick="showMembersToDelete()">Members</button>
+    <button onclick="showUsersToAdd()">Add member</button>
+
+    <ul id="ulSelectFriend"></ul>
+
+  </div>
+
+
+  <div id="divVideoCall">
+    <div id="divLocalVideo">
+      <video id="localVideo" autoplay="autoplay" muted="mute"></video>
+      <br>
+      <div id="divLocalVideoControl">
+        <button onclick="stopMicrophone()">Mute</button>
+        <button onclick="stopCamera()">Show</button>
+        <button onclick="stopCall()">Stop</button>
+      </div>
+    </div>
+
+
+    <div id="divRemoteVideoControl">
+
+      <div id="divRemoteVideo">
+        <video id="remoteVideo" autoplay="autoplay" muted="mute"></video>
+      </div>
+    </div>
+
+
+
+  </div>
+<!--
+
+  <script lang="javascript">
+    var __vnp = { code: 15554, key: '', secret: 'f912fe2e68a1ed68b7a5beac19d92a04' };
+    (function () {
+      var ga = document.createElement('script');
+      ga.type = 'text/javascript';
+      ga.async = true;
+      ga.defer = true;
+      ga.src = 'https://core.vchat.vn/code/tracking.js';
+      var s = document.getElementsByTagName('script');
+      s[0].parentNode.insertBefore(ga, s[0]);
+    })();
+  </script>
+
+  -->
+  
+</body>
+
+</html>

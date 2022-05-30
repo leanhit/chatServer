@@ -1,0 +1,962 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+
+var app = require('../app');
+var debug = require('debug')('mix:server');
+var http = require('http');
+
+/**
+ * Get port from environment and store in Express.
+ */
+
+var port = normalizePort(process.env.PORT || '8888');
+app.set('port', port);
+
+/**
+ * Create HTTP server.
+ */
+
+var server = http.createServer(app);
+
+//const server = require('http').Server(app);
+
+
+/**
+ * Listen on provided port, on all network interfaces.
+ */
+
+server.listen(port);
+server.on('error', onError);
+server.on('listening', onListening);
+
+/**
+ * Normalize a port into a number, string, or false.
+ */
+
+function normalizePort(val) {
+  var port = parseInt(val, 10);
+
+  if (isNaN(port)) {
+    // named pipe
+    return val;
+  }
+
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+
+  return false;
+}
+
+/**
+ * Event listener for HTTP server "error" event.
+ */
+
+function onError(error) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  var bind = typeof port === 'string'
+    ? 'Pipe ' + port
+    : 'Port ' + port;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+/**
+ * Event listener for HTTP server "listening" event.
+ */
+
+function onListening() {
+  var addr = server.address();
+  var bind = typeof addr === 'string'
+    ? 'pipe ' + addr
+    : 'port ' + addr.port;
+  debug('Listening on ' + bind);
+}
+
+//-----------------------------------------------------------
+const fs = require('fs');
+const io = require('socket.io')(server, {
+  cors: {
+    origin: '*',
+  }
+});
+//declare variable
+var defineVal = require('../public/javascripts/server/defineValue.js');
+//function process images
+var images = require('../public/javascripts/server/images.js');
+//function process db
+var dbAccess = require('../public/javascripts/server/dbAccess.js');
+//manage messages in db
+var messMng = require('../public/javascripts/server/messages.js');
+//manage rooms in db
+var roomsMng = require('../public/javascripts/server/rooms.js');
+//manage rooms in db
+var msqlDB = require('../public/javascripts/server/msqlDB.js');
+//manage rooms in db
+var dbManage = require('../public/javascripts/server/dbManage.js');
+
+const { Console } = require('console');
+
+//global values
+
+var jwToken = require('../public/javascripts/server/jwToken.js');
+const { maxUsernameLength } = require('../public/javascripts/server/defineValue.js');
+
+
+//array off socket.id off user still online
+var listUserSocketId = [];
+//local path of picture 
+var local = __dirname + "/../public/images/upload/";
+//total number of romm of server
+var roomsCounter = 1;//dbAccess.getRoomsCounter();
+
+
+//function return socket.id of username
+function findSocketId(username) {
+  var tempObject = listUserSocketId.find(obj => obj.name == username);
+  return tempObject?.socketId;
+}
+//function delete username and socket.id from listUserSocketId
+function deleteSockId(username) {
+  var index = -1;
+  for (var i = 0; i < listUserSocketId.length; i++) {
+    var temp = listUserSocketId[i];
+    if (temp.name == username) {
+      index = i;
+    }
+  }
+  if (index > -1) {
+    //delete key of user disconnect
+    listUserSocketId.splice(index, 1);
+  } else {
+    //do nothing
+  }
+}
+
+io.on('connection', function (client) {
+  console.log("Client connecting...");
+  //list of temp image
+  var imgList = [];
+  //list of chatter
+  var myChatList = [];
+  var myAlertList = [];
+  var myRoomsList = [];
+  const onlineStatus = 2;
+  const offlineStatus = 1;
+  const exitsFriend = 'exits';
+
+  function getRoomInfo(roomID) {
+    let temp = '';
+    myRoomsList.forEach(room => {
+      if (room.roomID == roomID) {
+
+        return temp = room;
+      }
+    });
+    return temp;
+  }
+  //check a friend has exits or not
+  function checkFindOutUser(username) {
+    var currentRlsStatus = dbAccess.getRlsStatus(client.username, username);
+    currentRlsStatus.catch(err => {
+
+    }).then(rlsStatus => {
+      var findUserResult = {
+        rlsStatus: rlsStatus,
+        username: username
+      };
+      client.emit('findUserResult', findUserResult);
+
+    });
+
+  }
+
+  //function alert friend about my status
+  function alertFriendMyStatus(myStatus) {
+    //look up all list
+    myChatList.forEach(aChatter => {
+      //find user still online and # chatbot
+      if (aChatter.rlsStatus == dbAccess.rlsFriend && aChatter.userStatus == onlineStatus) {
+        var userSocketId = findSocketId(tempChatter[0]);
+        var myInfo = {
+          username: client.username,
+          myStatus: myStatus
+        }
+        io.to(userSocketId).emit("friendStatusResult", myInfo);
+
+      }
+    });
+
+  }
+
+  //get event find an user
+  client.on('findUser', function (searchInfo) {
+    let searchFrom = searchInfo.searchFrom;
+    let searchContent = searchInfo.searchContent;
+
+    let findUserObj;
+    if (searchFrom)
+      findUserObj = dbManage.findUser(searchContent);
+    else
+      findUserObj = msqlDB.findUser(searchContent);
+
+    findUserObj.then(result => {
+      if (result.resultType === false)
+        client.emit('findUserResult', false);
+      else
+        checkFindOutUser(result.resultContent);
+    });
+  });
+
+  function addToListsSocketId() {
+
+    //add key to find socketId by username
+    var key = {
+      name: client.username,
+      socketId: client.id
+    }
+    listUserSocketId.push(key);
+
+  }
+
+  function getChatList() {
+    const username = client.username;
+    let chatlistObj = dbManage.getChatList(username);
+
+    chatlistObj.then(result => {
+      if (result.resultType === true) {
+        let data = result.resultContent;
+        if (data.length <= 0) {
+          //create user default database                    
+          images.createAvatarDefault(username);
+          dbAccess.createdDefaultUserDB(username);
+
+        } else {
+          //clear myChatList
+          myChatList = [];
+          //clear myRoomsList
+          myRoomsList = [];
+
+          data.forEach(function (aChatter) {
+            //setup myChatList                
+            let tempStatus;
+            //if socketid of friend exit, friend is online
+            const chatterSocketId = findSocketId(aChatter.nameID);
+            if (chatterSocketId) {
+              //online status = 2
+              tempStatus = onlineStatus;
+            } else {//offline status = 1
+              tempStatus = offlineStatus;
+            }
+            //add status of relationship 
+            var tempChatter = {
+              nameID: aChatter.nameID,
+              realName: aChatter.realName,
+              lastChat: aChatter.lastChat,
+              userStatus: tempStatus,
+              rlsStatus: aChatter.currentRlsStatus
+            }
+            //add friend info to chat lists
+            myChatList.push(tempChatter);
+
+            //setup my rooms list
+            if (aChatter.nameID.length > 20) {
+              //join this room
+              client.join(aChatter.nameID);//roomID
+              //console.log(client.username + " joined room " + aChatter.name);
+
+              //setup myRoomsList
+              var tempRoom = {
+                roomID: aChatter.nameID,
+                roomName: aChatter.realName,
+                members: aChatter.members,
+                lastChat: aChatter.lastChat
+              }
+              myRoomsList.push(tempRoom);
+            }
+
+          });
+        }
+
+        //return chat list to client
+        client.emit('getChatListResult', myChatList);
+        client.emit('getRoomsListResult', myRoomsList);
+
+        //alert friend you are online
+        alertFriendMyStatus(onlineStatus);
+      }
+    });
+  }
+
+  function makeAlertToFriend(action, friendName) {
+    action.then(function (idResult) {
+      //write alert to alert lists
+      dbAccess.addNewAlert(friendName, client.username, dbAccess.actAddFriend, idResult);
+
+    });
+
+    //alert if 'victim' online      
+    var userSocketId = findSocketId(friendName);
+    if (userSocketId) {
+      io.to(userSocketId).emit('addFriendRequestAlert', client.username);
+    }
+  }
+
+  function pocessRelastionshipRequest(friendName) {
+    //add new friend to my chat list or modify relStatus if this one exits
+    var exitsUser = dbAccess.checkExitsUser(client.username, friendName);
+    exitsUser.then(function (result) {
+      if (result === dbAccess.userNotExits) {
+        dbAccess.addNewFriendToChatList(client.username, friendName, dbAccess.rlsAddFriendRequest);
+      } else {
+        dbAccess.changeRlsStatus(client.username, friendName, dbAccess.rlsAddFriendRequest);
+      }
+    });
+
+    //add me to friend chat list or modify relStatus if I exits
+    var exitsMe = dbAccess.checkExitsUser(friendName, client.username);
+    exitsMe.then(function (result) {
+      if (result === dbAccess.userNotExits) {
+        //add new friend to her/him chat list and return id 
+        var promiseResult = dbAccess.addNewFriendToChatList(friendName, client.username, dbAccess.rlsAddFriendRecive);
+        makeAlertToFriend(promiseResult, friendName);
+      } else {
+        var promiseResult = dbAccess.changeRlsStatus(client.username, friendName, dbAccess.rlsAddFriendRequest);
+        makeAlertToFriend(promiseResult, friendName);
+      }
+    });
+  }
+
+  //get event add friend. 
+  client.on('addFriend', function (friendName) {
+    if (friendName) {
+      pocessRelastionshipRequest(friendName);
+      client.emit('addFriendResult', true);
+
+
+    } else {
+      //alert err
+      client.emit('addFriendResult', false);
+    }
+
+  });
+
+  client.on('refreshData', () => {
+    getChatList();
+  });
+
+  //get event registry
+  client.on('userRegistry', function (info) {
+    dbManage.userRegistry(info);
+  });
+
+  client.on('userLogin', loginInfo => {
+    let loginObj;
+    if (loginInfo.loginType === defineVal.loginToMongoDB)
+      loginObj = dbManage.userLogin(loginInfo.content);
+
+    else if (loginInfo.loginType === defineVal.loginToMssqlDB)
+      loginObj = msqlDB.userLogin(loginInfo.content);
+
+    else
+      loginObj = jwToken.userLogin(loginInfo.content);
+
+    loginObj.then(result => {
+      loginResult(result);
+
+      if (result.resultType === true) {
+        let username = result.resultContent;
+        createToken(username);
+
+        //set global values
+        client.username = username;
+        //loadChatList(username);
+        addToListsSocketId();
+        //get my chat list
+        getChatList();
+        getAlertList();
+      }
+    });
+  });
+
+  function loginResult(result) {
+    client.emit('userLoginResult', result);
+  }
+
+  function createToken(usname) {
+    const token = jwToken.encodeToken(usname);
+    client.emit('jwtResult', token);
+    console.log("result token");
+  }
+
+  client.on('updateAvatar', function (avatarNew) {
+
+    var newAvatar = [];
+    newAvatar.push(images.creteFilename(avatarNew.base64));
+    newAvatar.push(images.getBase64Image(avatarNew.base64));
+    if (client.username) {
+
+      dbAccess.UpdateImgCollection(client.username, "avatar", newAvatar);
+      images.updateAvatar(client.username, avatarNew);
+      client.emit("updateAvatarResult", true);
+    }
+
+  });
+
+  function processImgMess(messContent) {
+    let imgName = [];
+    messContent.forEach(img => {
+
+      var savedFilename = images.creteFilename(img.base64);
+      var imgBase64 = images.getBase64Image(img.base64);
+      var uri = local + savedFilename;
+
+      imgName.push(savedFilename);
+      //write image to local
+      images.writeImage(uri, imgBase64);
+      imgList.push(uri);
+    });
+    return imgName;
+  }
+
+  function processMessageFromDB(chatWith, mess) {
+    //if image
+    let messType;
+    let messContent;
+    if (mess.imgBase64) {
+      var imgMess = mess.imgBase64.slice();
+      var imgName = processImgMess(imgMess);
+
+      messType = true;
+      messContent = imgName;
+    } else { //if text
+      messContent = mess.textMess;
+      messType = false;
+    }
+
+    let tempLine = {
+      sender: mess.sender,
+      created: mess.created,
+      messType: messType,
+      messContent: messContent,
+      userGetMess: chatWith
+    }
+    return tempLine;
+  }
+
+  //get open chat box event
+  client.on('openChatBox', function (chatWithUser) {
+    readDatabaseMessage(chatWithUser, 1);
+  });
+
+  //get event read more message
+  client.on("readMoreMess", function (data) {
+    if (data) {
+      var chatWithUser = data.friendName;
+      var messagePagesNumber = data.count;
+      readDatabaseMessage(chatWithUser, messagePagesNumber);
+    }
+  });
+
+
+  function readDatabaseMessage(chatWithUser, messagePagesNumber) {
+    var dbName = defineVal.dbUser + client.username;
+    var messages = [];
+    //catch err access db
+    if (chatWithUser != null) {
+      messObj = messMng.readDatabaseMessage(dbName, chatWithUser, messagePagesNumber);
+      messObj.then(result => {
+        if (result.resultType === true) {
+          result.resultContent.forEach(function (mess) {
+            messages.push(processMessageFromDB(chatWithUser, mess));
+          });
+          //return messages to client
+          if (messagePagesNumber == 1) {//open chat box                     
+
+            client.emit('openChatBoxResult', messages);
+          } else {//read more message
+
+            client.emit('readMoreMessResult', messages);
+          }
+        }
+      });
+    }
+  }
+
+  function processMessageFromClient(msg) {
+    var userGetMess = msg.userGetMess;
+    var messType = msg.messType;
+    var messContent = msg.messContent;
+
+    //process message by type of it
+    if (messType) {        //image mess
+      //save msg to db of sender
+      messMng.saveMessImageBase64Sender(client.username, userGetMess, messContent);
+      //save msg to db of giver
+      messMng.saveMessImageBase64Giver(userGetMess, client.username, messContent);
+
+      var imgName = processImgMess(messContent);
+
+      messContent = imgName;
+    } else {        //text mess
+      //save msg to db of sender
+      messMng.saveMessTxtSender(client.username, userGetMess, messContent);
+      //save msg to db of giver
+      messMng.saveMessTxtGiver(userGetMess, client.username, messContent);
+    }
+
+    var messFeedback = {
+      sender: client.username,
+      created: new Date(),
+      messType: messType,
+      messContent: messContent,
+      userGetMess: userGetMess
+    };
+
+    //feedback to send
+    client.emit("message", messFeedback);
+
+    //get socketid of giver
+    var userSocketId = findSocketId(userGetMess);
+    //alert to giver
+    if (userSocketId)
+      io.to(userSocketId).emit('message', messFeedback);
+
+  }
+
+  function processMessageFromClientRoom(msg) {
+    let roomID = msg.userGetMess;
+    let messType = msg.messType;
+    let messContent = msg.messContent;
+
+    var room = getRoomInfo(roomID);
+
+    let members = room.members;
+
+    if (messType) {        //image mess
+      members.forEach(member => {
+        //update chat time
+        dbAccess.updateChatList(member, roomID, dbAccess.updateOderChatList);
+        //save msg to db of all member in room
+        messMng.saveMessImageBase64Room(members, roomID, messContent, client.username);
+      });
+
+      var imgName = processImgMess(messContent);
+
+      messContent = imgName;
+    } else {        //text mess
+      members.forEach(member => {
+        //update chat time
+        dbAccess.updateChatList(member, roomID, dbAccess.updateOderChatList);
+        //save msg to db of all member in room
+        messMng.saveMessTxtRoom(member, roomID, messContent, client.username);
+      });
+    }
+    var messFeedback = {
+      sender: client.username,
+      created: new Date(),
+      messType: messType,
+      messContent: messContent,
+      userGetMess: roomID
+    };
+
+
+    //send mess to all member in room
+    io.to(roomID).emit('message', messFeedback);
+    //------------------------------------------------------------
+    //console.log(io.sockets.adapter.rooms.get(roomID).size);
+  }
+
+  //recive mess event
+  client.on('message', function (msg) {
+    const chatter = msg.userGetMess;
+    if (chatter.length >= defineVal.minUsernameLength && chatter.length <= defineVal.maxUsernameLength) {
+      //add last chat time to chatList of sender
+      dbAccess.updateChatList(client.username, chatter, dbAccess.updateOderChatList);
+      //add last chat time to chatList of givae
+      dbAccess.updateChatList(chatter, client.username, dbAccess.updateOderChatList);
+      processMessageFromClient(msg);
+    } else if (chatter.length > defineVal.maxUsernameLength) {
+      processMessageFromClientRoom(msg);
+    }
+
+  });
+
+  client.on('deleteOneMe', function (mess) {
+    //not for now sorry
+  });
+
+  client.on('deleteMessOf', function (user) {
+
+    //catch err access db
+    if (dbAccess.checkAccsessDB(client.username, user)) {
+      if (user.length > defineVal.maxUsernameLength) {
+        removefromRoom(user, client.username);//roomID = user
+      } else {
+
+        var dbName = defineVal.dbUser + client.username;
+        var collectionName = user;
+        //dell this user from chatList
+        dbAccess.updateChatList(client.username, user, dbAccess.dellFromChatList);
+        //change relationship of deleted friend from rlsFriend to rlsStranger
+        dbAccess.changeRlsStatus(user, client.username, dbAccess.rlsStranger);
+        dbManage.deleteUserDB(dbName, user).then(result => {
+          client.emit('deleteMess', result);
+        });
+      }
+    }
+  });
+
+  //del img was created 
+  function delTempImg() {
+    for (var i = 0; i < imgList.length; i++) {
+      fs.unlink(imgList[i], function (err) {
+        if (err) {
+          console.log(err);
+        } else {
+
+        }
+      });
+    }
+  }
+
+  //-------------------room function--------------------------
+  function createroomID() {
+    roomsCounter++;
+    //dbAccess.setRoomsCounter(roomsCounter);
+    var roomID = "roomID_" + images.randomString(10) + "_";
+    var roomNumber = roomsCounter.toString();
+    //add zero to roomNumber
+    for (var i = 0; i < (6 - roomNumber.length); i++) {
+      roomID += "0";
+    }
+
+    return roomID + roomNumber;
+  }
+
+  function removefromRoom(roomID, member) {
+    var room = getRoomInfo(roomID);
+    var membersList = room.members;
+
+    var usernameIndex = membersList.indexOf(member);
+
+    if (usernameIndex >= 0) {
+      //remove room with roomID from chatList of member was removed
+      dbAccess.updateChatList(member, roomID, dbAccess.dellFromChatList);
+
+      //remove this member from members
+      membersList.splice(usernameIndex, 1);
+      //update members list of other guys
+      membersList.forEach(member => {
+        roomsMng.updateRoomMember(roomID, member, membersList);
+      });
+
+    }
+  }
+
+  client.on('createRoom', function (roomInfo) {
+    var roomMembers = roomInfo.roomMembers;
+    var roomName = roomInfo.roomName;
+
+    if (roomName.length <= 0)
+      roomName = "Group chat";
+
+    let newInfo = {
+      roomID: createroomID(),
+      roomName: roomName,
+      roomMembers: roomMembers
+    }
+
+    //some room in server create when some client.join('roomName')
+    //create data for all member of room
+    roomMembers.forEach(member => {
+      roomsMng.createRoom(member, newInfo);
+    });
+
+  });
+
+  //it main open chat box of a room with id
+  client.on('addGroupMember', function (info) {
+    var roomID = info.roomID;
+    var newMember = info.newMenber;
+
+    if (roomID.length > defineVal.maxUsernameLength) {
+      var room = getRoomInfo(roomID);
+      var membersList = room.members;
+      membersList.push(newMember);
+
+      var roomInfo = {
+        roomID: roomID,
+        roomName: room.roomName,
+        members: membersList
+      }
+
+      //add room with roomID to chatList of member was removed
+      roomsMng.insertRoomToChatList(newMember, roomInfo);
+
+      //update members list of other guys
+      membersList.forEach(member => {
+        roomsMng.updateRoomMember(roomID, member, membersList);
+      });
+
+    }
+  });
+
+  client.on("removeGroupMember", function (removeInfo) {
+    if (removeInfo) {
+      getChatList(client.username);
+      removefromRoom(removeInfo.roomID, removeInfo.userDel);
+    }
+  });
+
+  client.on("changeGroupName", function (newNameInfo) {
+    var roomID = newNameInfo.roomID;
+    var newName = newNameInfo.newName;
+    if (roomID.length > defineVal.maxUsernameLength) {
+      var room = getRoomInfo(roomID);
+      var roomMembers = room.members;
+      roomMembers.forEach(member => {
+        roomsMng.updateRoomName(roomID, member, newName);
+      })
+    }
+  });
+
+
+  //------------------------------------
+  client.on('changeRelationship', function (data) {
+    var rlsType = data.rlsType;
+    var friendName = data.friendName;
+
+    var socketId = findSocketId(friendName);
+    switch (rlsType) {
+      case dbAccess.rlsUnfriend: //this case i unfriend afriend
+        //change relationship status of me
+        dbAccess.changeRlsStatus(client.username, friendName, dbAccess.rlsStranger);
+        //change relationship status of friend 
+        dbAccess.changeRlsStatus(friendName, client.username, dbAccess.rlsStranger);
+
+        break;
+      case dbAccess.rlsLock: //this case i lock an user
+        //change relationship status of my chat list 
+        dbAccess.updateChatList(client.username, friendName, dbAccess.rlsLock);
+        //change relationship status of victim 
+        dbAccess.changeRlsStatus(friendName, client.username, dbAccess.rlsStranger);
+
+        break;
+      case dbAccess.rlsUnlock: //this case i unlock and user
+        //change relationship status of sender 
+        dbAccess.updateChatList(client.username, friendName, dbAccess.rlsStranger);
+
+        break;
+      case dbAccess.addFriendCancel: //this case i cancel request add firend request
+        //change relationship status of getter
+        var promiseResult = dbAccess.changeRlsStatus(client.username, friendName, dbAccess.rlsFriend);
+        //i change my got request so i delete alert of this one
+        promiseResult.then(function (idResult) {
+
+          dbAccess.updateAlertList(client.username, dbAccess.deleteAlert, idResult);
+        });
+        if (socketId) {
+          io.to(socketId).emit("changeRelationshipResult", data);
+        }
+        //change relationship status of sender 
+        dbAccess.changeRlsStatus(friendName, client.username, dbAccess.rlsStranger);
+
+        break;
+      case dbAccess.addFriendReject:
+        //change relationship status of requester in my chat list
+        var promiseResult = dbAccess.changeRlsStatus(client.username, friendName, dbAccess.rlsStranger);
+        //i change my got request so i delete alert of this one
+        promiseResult.then(function (idResult) {
+
+          dbAccess.updateAlertList(client.username, dbAccess.deleteAlert, idResult);
+        });
+        if (socketId) {
+          io.to(socketId).emit("changeRelationshipResult", data);
+        }
+        //change relationship status of sender 
+        var promiseResult = dbAccess.changeRlsStatus(friendName, client.username, dbAccess.rlsStranger);
+
+
+        break;
+      case dbAccess.addFriendAccept:
+        //change relationship status of giver 
+        var promiseResult = dbAccess.changeRlsStatus(client.username, friendName, dbAccess.rlsFriend);
+        //i change my got request so i delete alert of this one
+        promiseResult.then(function (idResult) {
+
+          dbAccess.updateAlertList(client.username, dbAccess.deleteAlert, idResult);
+        });
+        if (socketId) {
+          io.to(socketId).emit("changeRelationshipResult", data);
+        }
+
+        //change relationship status of sender 
+        dbAccess.changeRlsStatus(friendName, client.username, dbAccess.rlsFriend);
+
+        break;
+
+      default://getter saw request but do not feedback
+
+        //change relationship status of giver 
+        var promiseResult = dbAccess.changeRlsStatus(client.username, friendName, dbAccess.rlsAddFriendWait);
+        promiseResult.then(function (idResult) {
+          dbAccess.updateAlertList(client.username, dbAccess.updateAlert, idResult);
+        });
+    }
+  });
+
+  function getAlertList() {
+    var promiseResult = dbAccess.getAlertList(client.username);
+    promiseResult.then(function (alertList) {
+
+      client.emit('getAlertListResult', alertList);
+    })
+  }
+
+  //----------------------------------------------------------------------------
+
+  client.on('ackUser', function (callTo) {
+    const startTime = new new Date();
+    const startTimeMs = startTime.getTime();
+    let socketId = findSocketId(callTo);
+    if (socketId) {
+      console.log(client.username + " ack to: " + callTo);
+      client.to(socketId).emit('ackUserCome', client.username);
+      client.emit('ackUserResult', onlineStatus);
+    } else {
+      console.log(callTo + "do not online");
+      client.emit('ackUserResult', offlineStatus);
+    }
+  });
+
+  client.on('ackUserFeedBack', function (content) {
+    const friendName = content[0];
+    const friendAnswer = content[1];
+
+    const socketId = findSocketId(friendName);
+    if (socketId) {
+      client.to(socketId).emit('ackUserFeedbackResult', friendAnswer);
+    }
+  });
+
+  client.on('startCall', function (offerObj) {
+    console.log(client.username + " send offer signal to " + offerObj[0] + ":   " + offerObj[1]);
+    let socketId = findSocketId(offerObj[0]);
+
+    client.to(socketId).emit('webrtcOfferCome', offerObj[1]);
+  });
+
+  client.on('webrtcAnswer', function (offerObj) {
+    console.log(client.username + " feedback signal answer to " + offerObj[0] + ":   " + offerObj[1]);
+    let socketId = findSocketId(offerObj[0]);
+
+    client.to(socketId).emit('webrtcAnswerResult', offerObj[1]);
+  });
+
+  client.on('endTheCall', function (endCallObj) {
+    let breakedUser = endCallObj[0];
+    console.log(client.username + " break up with " + breakedUser);
+    let socketId = findSocketId(breakedUser);
+
+    const endTime = new new Date();
+    const endTimeMs = endTime.getTime();
+    client.to(socketId).emit('endTheCallCome', endCallObj);
+  });
+
+  //====================functions of message from guest==========================
+
+  client.on("guestMessage", messObj => {
+    processGuestMessage(messObj);
+  });
+
+
+  function processGuestMessage(msg) {
+    var userSentMess = msg.sender;
+    var userGetMess = msg.userGetMess;
+    var messType = msg.messType;
+    var messContent = msg.messContent;
+
+    //process message by type of it
+    if (messType) {        //image mess
+      if (userGetMess.length > maxUsernameLength)
+        //save msg to db of sender
+        messMng.saveMessImageBase64Sender(client.username, userGetMess, messContent);
+
+      if (userSentMess.length > maxUsernameLength)
+        //save msg to db of giver
+        messMng.saveMessImageBase64Giver(userGetMess, userSentMess, messContent);
+
+      var imgName = processImgMess(messContent);
+
+      messContent = imgName;
+    } else {        //text mess
+      
+      if (userGetMess.length > maxUsernameLength)
+        //save msg to db of sender
+        messMng.saveMessTxtSender(client.username, userGetMess, messContent);
+
+      if (userSentMess.length > maxUsernameLength)
+        //save msg to db of giver
+        messMng.saveMessTxtGiver(userGetMess, userSentMess, messContent);
+
+    }
+
+    var messFeedback = {
+      sender: userSentMess,
+      created: new Date(),
+      messType: messType,
+      messContent: messContent,
+      userGetMess: userGetMess
+    };
+
+    //feedback to send
+    client.emit("guestMessage", messFeedback);
+
+    //get socketid of giver
+    var userSocketId = findSocketId(userGetMess);
+    //alert to giver
+    if (userSocketId)
+      io.to(userSocketId).emit('message', messFeedback);
+
+  }
+
+
+
+
+
+  //-------------------------------------------------------
+
+  client.on('disconnect', function () {
+    //alert friend you are online
+    alertFriendMyStatus(offlineStatus);
+    delTempImg();
+    deleteSockId(client.username);
+    client.username = null;
+    console.log('a client disconnected');
+
+  });
+
+
+});
+
+
