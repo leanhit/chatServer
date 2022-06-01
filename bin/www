@@ -113,17 +113,20 @@ var roomsMng = require('../public/javascripts/server/rooms.js');
 var msqlDB = require('../public/javascripts/server/msqlDB.js');
 //manage rooms in db
 var dbManage = require('../public/javascripts/server/dbManage.js');
+//manage guest in db
+var guestManage = require('../public/javascripts/server/guestManage.js');
 
 const { Console } = require('console');
 
 //global values
 
 var jwToken = require('../public/javascripts/server/jwToken.js');
-const { maxUsernameLength } = require('../public/javascripts/server/defineValue.js');
+
 
 
 //array off socket.id off user still online
 var listUserSocketId = [];
+var listGuestSocketId = [];
 //local path of picture 
 var local = __dirname + "/../public/images/upload/";
 //total number of romm of server
@@ -158,7 +161,6 @@ io.on('connection', function (client) {
   var imgList = [];
   //list of chatter
   var myChatList = [];
-  var myAlertList = [];
   var myRoomsList = [];
   const onlineStatus = 2;
   const offlineStatus = 1;
@@ -884,11 +886,40 @@ io.on('connection', function (client) {
   });
 
   //====================functions of message from guest==========================
+  function makeGuestName(guestIdentify) {
+    let tempArray = guestIdentify.split('_');
+
+    let guestName = "Guest_" + tempArray[2];
+    return guestName;
+  }
+
+  function updateMyGuesttsList(guestIdentify) {
+    let guestName = makeGuestName(guestIdentify);
+    let tempGuest = {
+      guestIdentify: guestIdentify,
+      guestName: guestName,
+      guestSocketID: client.id
+    }
+    listGuestSocketId.push(tempGuest);
+    return guestName;
+  }
+
+  //function return socket.id of username
+  function findGuestSocketId(guestIdentify) {
+    let findOut=false;
+    listGuestSocketId.forEach((aGuest)=>{      
+      if(aGuest.guestIdentify == guestIdentify){
+        findOut = aGuest.guestSocketID;
+        return findOut;
+      }
+    });
+    return findOut;
+  }
 
   client.on("guestMessage", messObj => {
+    updateGuesttsList(messObj.sender, messObj.userGetMess);
     processGuestMessage(messObj);
   });
-
 
   function processGuestMessage(msg) {
     var userSentMess = msg.sender;
@@ -898,27 +929,25 @@ io.on('connection', function (client) {
 
     //process message by type of it
     if (messType) {        //image mess
-      if (userGetMess.length > maxUsernameLength)
+      if (userGetMess.length > defineVal.maxUsernameLength) {
         //save msg to db of sender
         messMng.saveMessImageBase64Sender(client.username, userGetMess, messContent);
-
-      if (userSentMess.length > maxUsernameLength)
+      } else {
         //save msg to db of giver
         messMng.saveMessImageBase64Giver(userGetMess, userSentMess, messContent);
-
+      }
       var imgName = processImgMess(messContent);
 
       messContent = imgName;
     } else {        //text mess
-      
-      if (userGetMess.length > maxUsernameLength)
+
+      if (userGetMess.length > defineVal.maxUsernameLength) {
         //save msg to db of sender
         messMng.saveMessTxtSender(client.username, userGetMess, messContent);
-
-      if (userSentMess.length > maxUsernameLength)
+      } else {
         //save msg to db of giver
         messMng.saveMessTxtGiver(userGetMess, userSentMess, messContent);
-
+      }
     }
 
     var messFeedback = {
@@ -929,18 +958,83 @@ io.on('connection', function (client) {
       userGetMess: userGetMess
     };
 
+    let giverSocketID = "";
+
+    if (userSentMess.length > defineVal.maxUsernameLength) {
+      giverSocketID = findSocketId(userGetMess);
+    } else {
+      giverSocketID = findGuestSocketId(userGetMess);
+    }
+
     //feedback to send
     client.emit("guestMessage", messFeedback);
-
-    //get socketid of giver
-    var userSocketId = findSocketId(userGetMess);
     //alert to giver
-    if (userSocketId)
-      io.to(userSocketId).emit('message', messFeedback);
-
+    if (giverSocketID)
+      io.to(giverSocketID).emit('guestMessage', messFeedback);
   }
 
+  function updateGuesttsList(userSentMess, userGetMess) {
+    if (userSentMess.length > defineVal.maxUsernameLength) {
+      if (findGuestSocketId(userSentMess)) {
+        //guest exits => do nothing
+      } else {        
+        //add guest identify to global arry
+        let guestName = updateMyGuesttsList(userSentMess);
 
+        //check guest is exits in guetsList of admin
+        let checkExitsGuest = guestManage.checkExitsGuest(userGetMess, userSentMess);
+        
+        checkExitsGuest.then(checkResult => {
+          if (checkResult == guestManage.guestNotExits) {
+            //add new guest to guetsList of admin
+            guestManage.addNewGuest(userGetMess, userSentMess, guestName);
+          }
+        })
+      }
+      
+    }
+  }
+  
+  function getGuestList() {
+    let guestsListObj = guestManage.getGuestsList(client.username);
+    let    tempList = [];
+    guestsListObj.then(result => {
+      if (result.resultType === true) {
+        let data = result.resultContent;
+        if (data.length <= 0) {
+          //do nothing
+        } else {
+          data.forEach(function (aGuest) {
+            //setup myChatList                
+            let tempStatus;
+            //if socketid of friend exit, friend is online
+            const guestSocketId = findGuestSocketId(aGuest.guestID);
+            if (guestSocketId) {
+              //online status = 2
+              tempStatus = onlineStatus;
+            } else {//offline status = 1
+              tempStatus = offlineStatus;
+            }
+            //add status of relationship 
+            var tempChatter = {
+              nameID: aGuest.guestID,
+              realName: aGuest.guestName,
+              lastChat: aGuest.lastChat,
+              userStatus: tempStatus,
+              rlsStatus: defineVal.rlsStranger
+            }
+            //add friend info to chat lists
+            tempList.push(tempChatter);
+          });
+        }
+        client.emit("getGuestsListResult", tempList);
+      }
+    });
+  }
+
+  client.on("getGuestsList", () => {
+    getGuestList();
+  });
 
 
 

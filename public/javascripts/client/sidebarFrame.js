@@ -26,6 +26,7 @@ function logoutClick() {
 socket.on('getChatListResult', function (data) {
   //copy data to myChatList
   myListChat = data;
+  console.log(myListChat)
 
   setupSidebarFrame();
   setupStartFrame();

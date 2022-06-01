@@ -1,8 +1,13 @@
+const domainName = "http://localhost:8888";
+
 //global values.
 const imgPath = "/images/upload/";
 const iconPath = "/images/default/";
 const avatarPath = "/images/avatar/";
 const groupAvatarPath = "/images/default/defaultGroupAvatar.jpg";
+
+//chat with guest
+let isChatWithGuest = false;
 
 //define info off user array
 var loginInfo = [];

@@ -1,4 +1,4 @@
-const domainName = "http://localhost:8888";
+
 var socket = io.connect(domainName);
 //login type
 const loginByJwt = 0;

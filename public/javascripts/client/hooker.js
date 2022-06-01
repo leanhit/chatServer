@@ -1,17 +1,13 @@
-const domainName = "http://localhost:8888";
 var socket = io.connect(domainName);
 const prefix = "guestOf_";
 const rentHost = "localhost:8888";
 const currentAdmin = "hoingx";
 
-
 let guestId = "";
-
 
 window.onload = function () {
   setupGuestUser();
 }
-
 
 function validMobieNumber(mobieNumber) {
   var phoneno = /^\d{10}$/;
@@ -131,6 +127,7 @@ function sendMessage() {
       userGetMess: boxChatOf
     };
 
+    console.log(mess)
     socket.emit('guestMessage', mess);
 
     cleanInputMess(input);

@@ -24,6 +24,7 @@ const dbUser = "userDB_";
 const chatListCollection = "chatList";
 const alertListCollection = "alertList";
 const roomsCounterCollection = "roomscounter";
+const guestsListColection = "guestsList";
 
 
 //define db of jswToken
@@ -73,6 +74,7 @@ module.exports = {
     chatListCollection: chatListCollection,
     alertListCollection: alertListCollection,
     roomsCounterCollection: roomsCounterCollection,
+    guestsListColection:guestsListColection,
     userColection: userColection,
     dbUser: dbUser,
     refreshTokenCollection: refreshTokenCollection,

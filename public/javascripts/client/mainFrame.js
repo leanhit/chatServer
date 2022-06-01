@@ -140,7 +140,7 @@ function addMessage(body, mess, side) {
         } else if (i == 0 && j == 0) {//content cell
           //give pic
           if (mess.messType) {
-            mess.messContent.forEach(imgUrl=>{
+            mess.messContent.forEach(imgUrl => {
               let tdImg = addImgCell(tr, imgPath + imgUrl, sizeImgChat);
               tdImg.style.float = side;
             });
@@ -170,7 +170,7 @@ function addMessage(body, mess, side) {
         } else if (i == 0 && j == 1) {//content cell
           //give pic
           if (mess.messType) {
-            mess.messContent.forEach(imgUrl=>{
+            mess.messContent.forEach(imgUrl => {
               let tdImg = addImgCell(tr, imgPath + imgUrl, sizeImgChat);
               tdImg.style.float = side;
             });
@@ -193,49 +193,55 @@ function addMessage(body, mess, side) {
   tbl.appendChild(tbdy);
   body.appendChild(tbl);
 }
+
 function addaMessToWindow(mess, showType) {
 
   var userSend = mess.sender;
   var messageTo = mess.userGetMess;
   var members = [];
 
+  let isGuestMess = isGuestMessage(userSend, messageTo);
 
-  if (messageTo.length > maxUsernameLength) { //message send to room
-    if (boxChatOf == messageTo) {//roomID is equar
-      var room = getRoomInfo(messageTo);//open chat group => boxChatOf is a roomID
+  if (isGuestMess) {
+    showGuestMessage(mess);
+  } else {
+    if (messageTo.length > maxUsernameLength) { //message send to room
+      if (boxChatOf == messageTo) {//roomID is equar
+        var room = getRoomInfo(messageTo);//open chat group => boxChatOf is a roomID
 
-      //get members of the room with roomID = boxChatOf
-      members = room.members;
-    } else {  //message to an other room 
-      singleAlertType = alertGroupMessage;
-      friendInAlert = messageTo;
+        //get members of the room with roomID = boxChatOf
+        members = room.members;
+      } else {  //message to an other room 
+        singleAlertType = alertGroupMessage;
+        friendInAlert = messageTo;
 
-      var alertContent = userSend + " messaged " + messageTo;
-      showSingleAlert(alertContent);
+        var alertContent = userSend + " messaged " + messageTo;
+        showSingleAlert(alertContent);
+      }
+    } else { //mess frome user send to user
+
+      if (userSend != socket.username && userSend != boxChatOf) {
+        singleAlertType = alertFriendMessage;
+        friendInAlert = userSend;
+
+        var alertContent = friendInAlert + " messaged you";
+        showSingleAlert(alertContent);
+
+      }
     }
-  } else { //mess frome user send to user
 
-    if (userSend != socket.username && userSend != boxChatOf) {
-      singleAlertType = alertFriendMessage;
-      friendInAlert = userSend;
+    var body = document.getElementById("messages");
+    //set position of form        
+    if (socket.username == userSend) {//yourselt
+      //create table of mess
+      addMessage(body, mess, "right");
 
-      var alertContent = friendInAlert + " messaged you";
-      showSingleAlert(alertContent);
+    } else if ((boxChatOf == userSend && boxChatOf.length <= maxUsernameLength && messageTo.length <= maxUsernameLength) ||
+      (members.indexOf(userSend) > -1)) {//your friend or member of room
 
+      //create table chat list
+      addMessage(body, mess, "left");
     }
-  }
-
-  var body = document.getElementById("messages");
-  //set position of form        
-  if (socket.username == userSend) {//yourselt
-    //create table of mess
-    addMessage(body, mess, "right");
-
-  } else if ((boxChatOf == userSend && boxChatOf.length <= maxUsernameLength && messageTo.length <= maxUsernameLength) ||
-    (members.indexOf(userSend) > -1)) {//your friend or member of room
-
-    //create table chat list
-    addMessage(body, mess, "left");
   }
 
   if (showType) {
@@ -245,6 +251,36 @@ function addaMessToWindow(mess, showType) {
     //scroll screen
     $('#messages').animate({ scrollTop: $('#messages').prop("scrollHeight") }, 500);
   }
+}
+
+function isGuestMessage(userGetMess, userSendMess) {
+  let longName = "";
+  let shortName = "";
+  let isGuestMess = true;
+
+  if (userGetMess.length > maxUsernameLength) {
+    longName = userGetMess;
+    shortName = userSendMess;
+  } else if (userSendMess.length > maxUsernameLength) {
+    longName = userSendMess;
+    shortName = userGetMess;
+  } else {
+    isGuestMess = false;
+  }
+
+  console.log(isGuestMess, userGetMess, userSendMess);
+
+  if (isGuestMess) {
+    let tempArr = longName.split('_');
+    if ((tempArr.length == 3) && (tempArr[1] == "hoingx")) {
+      isGuestMess = true;
+    } else {
+      isGuestMess = false;
+    }
+  }
+
+  return isGuestMess;
+
 }
 
 //clear chat box
@@ -269,6 +305,7 @@ function selectUser(usname) {
 
 //listen answer message from server
 socket.on('openChatBoxResult', function (result) {
+
 
   clearChatBox();
   if (result.length > 0) {
@@ -371,7 +408,12 @@ function sendMessage() {
       userGetMess: boxChatOf
     };
 
-    socket.emit('message', mess);
+    console.log(mess)
+
+    if (isChatWithGuest)
+      socket.emit('guestMessage', mess);
+    else
+      socket.emit('message', mess);
     cleanInputMess(input);
   }
 }
