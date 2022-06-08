@@ -145,13 +145,6 @@ function deleteUserDB(dbName, user) {
                 if (delOK) {
                     console.log("Collection deleted");
 
-                    dbo.createCollection(collectionName, function (err) {
-                        if (err) {
-                            console.log(err);
-                        } else {
-                            db.close();
-                        }
-                    });
                     resolve(true);
                 }
             });

@@ -28,19 +28,19 @@ function dateTimeNow() {
 function checkAccsessDB(sender, giver) {
     var length_1 = "";
     if (sender) {
-        sender.length;
+        length_1=sender.length;
     } else {
         return false;
     }
 
     var length_2 = "";
     if (giver) {
-        giver.length;
+        length_2=giver.length;
     } else {
         return false;
     }
 
-    if ((6 <= length_1 || length_1 <= 25) && (6 <= length_2 || length_2 <= 25)) {
+    if ((6 <= length_1 || length_1 <= 30) && (6 <= length_2 || length_2 <= 30)) {
         return true;
     } else {
         return false;

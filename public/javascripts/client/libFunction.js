@@ -1,10 +1,11 @@
 const domainName = "http://localhost:8888";
-
+const currentAdmin = "hoingx";
 //global values.
 const imgPath = "/images/upload/";
 const iconPath = "/images/default/";
 const avatarPath = "/images/avatar/";
 const groupAvatarPath = "/images/default/defaultGroupAvatar.jpg";
+const guestAvatarPath = "/images/default/defaultAvatar.png";
 
 //chat with guest
 let isChatWithGuest = false;
@@ -127,8 +128,13 @@ function getFolderView(name) {
 }
 
 function getAvatarPathView(usname) {
+  
   if (usname?.length > maxUsernameLength) {
-    return groupAvatarPath;
+    if (isChatWithGuest) {
+      return guestAvatarPath;
+    } else {
+      return groupAvatarPath;
+    }
   } else {
     return avatarPath + getFolderView(usname) + usname + "_avatar.png"
   }
@@ -136,8 +142,8 @@ function getAvatarPathView(usname) {
 
 function getRoomInfo(roomID) {
   let temp = '';
-  myListRooms.forEach(room => {    
-    if (room.roomID == roomID){
+  myListRooms.forEach(room => {
+    if (room.roomID == roomID) {
       return temp = room;
     }
   });
@@ -159,10 +165,10 @@ function getRelationship(username) {
 //img size define
 const sizeImgStatus = "15";
 const sizeImgAvatar = "30";
-const sizeAvatarChat = "20";
+const sizeAvatarChat = "30";
 const sizeImgChat = "120";
-const sizeFontChat = "20";
-const sizeFontTime = "8";
+const sizeFontChat = "20px";
+const sizeFontTime = "10px";
 
 function addRb(rbName, rbValue) {
   var radiobutton = document.createElement('input');
@@ -193,7 +199,7 @@ function addTbl(tbWidth, tbFloat) {
   var tbl = document.createElement('table');
   tbl.style.width = tbWidth;
   if (tbFloat !== null)
-      tbl.style.float = tbFloat;
+    tbl.style.float = tbFloat;
   tbl.setAttribute('border', '0');
   return tbl;
 }
@@ -201,13 +207,13 @@ function addTbl(tbWidth, tbFloat) {
 function addImg(imgID, imgSize) {
   var img = document.createElement('img');
   if (imgSize === sizeImgAvatar) {
-      img.src = getAvatarPathView(imgID);
-      img.height = imgSize;
+    img.src = getAvatarPathView(imgID);
+    img.height = imgSize;
   } else if (imgSize === sizeImgStatus) {
-      img.src = getStatusIcon(imgID);
-      img.height = imgSize;
+    img.src = getStatusIcon(imgID);
+    img.height = imgSize;
   } else
-      img.src = imgID;
+    img.src = imgID;
 
   img.width = imgSize;
 
@@ -218,27 +224,27 @@ function addImage(imgSrc, imgWidth) {
   var img = document.createElement('img');
   img.src = imgSrc;
   img.width = imgWidth;
-  
+
   return img;
 }
 
 function addImgCell(tr, imgID, imgSize) {
-  //console.log(imgID)
   var td = document.createElement('td');
   var img = document.createElement('img');
   if (imgSize === sizeImgAvatar || imgSize === sizeAvatarChat) {
-      img.src = getAvatarPathView(imgID);
-      img.height = imgSize;
+    img.src = getAvatarPathView(imgID);
+    img.height = imgSize;
   } else if (imgSize === sizeImgStatus) {
-      img.src = getStatusIcon(imgID);
-      img.height = imgSize;
-      listCellStatus.push(td);
-  } else if(imgSize === sizeImgChat)
-      img.src = imgID;
+    img.src = getStatusIcon(imgID);
+    img.height = imgSize;
+    listCellStatus.push(td);
+  } else if (imgSize === sizeImgChat)
+    img.src = imgID;
 
   img.width = imgSize;
-  td.style.width = imgSize;
-  
+  img.marginTop = "1"
+  td.style.width = imgSize + "px";
+
 
   td.appendChild(img);
   //add cell to row

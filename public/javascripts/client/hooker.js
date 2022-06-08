@@ -1,7 +1,7 @@
 var socket = io.connect(domainName);
 const prefix = "guestOf_";
 const rentHost = "localhost:8888";
-const currentAdmin = "hoingx";
+
 
 let guestId = "";
 
@@ -43,7 +43,7 @@ function setupGuestUser() {
   const hostName = window.location.host;
   let ipObj = getLocalIp();
 
-  if (hostName === rentHost) {
+  if (1)/*(hostName === rentHost)*/ {
     ipObj.then(ip => {
       let tempArray = ip.split('.');
       let id = "";
@@ -53,7 +53,8 @@ function setupGuestUser() {
 
       guestId = prefix + currentAdmin + "_" + id;
 
-    })
+      loginACK("Guest_"+id);
+    });
 
   }
 
@@ -107,6 +108,19 @@ function enterPress(event) {
   }
 }
 
+function loginACK(guestName){
+  let messContent = guestName + " have been log in!!!";
+  let messType=false;
+  var mess = {
+    sender: guestId,
+    messType: messType,
+    messContent: messContent,
+    userGetMess: boxChatOf
+  };
+
+  socket.emit('guestMessage', mess);
+}
+
 function sendMessage() {
   if (boxChatOf !== null) {
     let input = document.getElementById("inputMessage");
@@ -127,7 +141,6 @@ function sendMessage() {
       userGetMess: boxChatOf
     };
 
-    console.log(mess)
     socket.emit('guestMessage', mess);
 
     cleanInputMess(input);
@@ -165,7 +178,7 @@ function addaMessToWindow(mess) {
 
   var body = document.getElementById("messages");
   //set position of form        
-  if ((userSend.length >maxUsernameLength)||(messageTo.length>maxUsernameLength)) {//yourselt
+  if (userSend.length >maxUsernameLength) {//yourselt
     //create table of mess
     addMessage(body, mess, "right");
   }else{//admin
@@ -198,7 +211,7 @@ function addMessage(body, mess, side) {
           } else {//text
             var tdText = addTextCell(tr, mess.messContent, sizeFontChat);
             tdText.style.float = side;
-
+            tdText.style.color= "blue"
           }
         } else if (i == 1 && j == 0) {//time cell
 
@@ -223,7 +236,8 @@ function addMessage(body, mess, side) {
             });
           } else {//text
             var tdText = addTextCell(tr, mess.messContent, sizeFontChat);
-            //tdText.style.float = side;
+            tdText.style.float = side;
+            tdText.style.color = "rebeccapurple";
 
           }
         } else if (i == 1 && j == 1) {//time cell

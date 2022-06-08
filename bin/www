@@ -133,6 +133,8 @@ var local = __dirname + "/../public/images/upload/";
 var roomsCounter = 1;//dbAccess.getRoomsCounter();
 
 
+
+
 //function return socket.id of username
 function findSocketId(username) {
   var tempObject = listUserSocketId.find(obj => obj.name == username);
@@ -607,16 +609,27 @@ io.on('connection', function (client) {
     //not for now sorry
   });
 
-  client.on('deleteMessOf', function (user) {
+  client.on('deleteMessOf', function (deleteInfo) {
+    let user = deleteInfo.userId;
+    let userType = deleteInfo.userType;
 
     //catch err access db
     if (dbAccess.checkAccsessDB(client.username, user)) {
       if (user.length > defineVal.maxUsernameLength) {
-        removefromRoom(user, client.username);//roomID = user
+        if (userType) {//delete from guest list          
+          //del this guest from guestList of user
+          guestManage.updateGuestList(client.username, guestManage.deleteGuest, user);
+          var dbName = defineVal.dbUser + client.username;
+          dbManage.deleteUserDB(dbName, user).then(result => {
+            client.emit('deleteMess', result);
+          });
+        } else {
+
+          removefromRoom(user, client.username);//roomID = user
+        }
       } else {
 
         var dbName = defineVal.dbUser + client.username;
-        var collectionName = user;
         //dell this user from chatList
         dbAccess.updateChatList(client.username, user, dbAccess.dellFromChatList);
         //change relationship of deleted friend from rlsFriend to rlsStranger
@@ -901,19 +914,37 @@ io.on('connection', function (client) {
       guestSocketID: client.id
     }
     listGuestSocketId.push(tempGuest);
+    client.guestIdentify = guestIdentify;
     return guestName;
   }
 
   //function return socket.id of username
   function findGuestSocketId(guestIdentify) {
-    let findOut=false;
-    listGuestSocketId.forEach((aGuest)=>{      
-      if(aGuest.guestIdentify == guestIdentify){
+    let findOut = false;
+    listGuestSocketId.forEach((aGuest) => {
+      if (aGuest.guestIdentify == guestIdentify) {
         findOut = aGuest.guestSocketID;
         return findOut;
       }
     });
     return findOut;
+  }
+
+  //function delete username and socket.id from listUserSocketId
+  function deleteGuestSockId(guestIdentify) {
+    var index = -1;
+    for (var i = 0; i < listGuestSocketId.length; i++) {
+      var temp = listGuestSocketId[i];
+      if (temp.guestIdentify == guestIdentify) {
+        index = i;
+      }
+    }
+    if (index > -1) {
+      //delete key of user disconnect
+      listGuestSocketId.splice(index, 1);
+    } else {
+      //do nothing
+    }
   }
 
   client.on("guestMessage", messObj => {
@@ -939,8 +970,7 @@ io.on('connection', function (client) {
       var imgName = processImgMess(messContent);
 
       messContent = imgName;
-    } else {        //text mess
-
+    } else {
       if (userGetMess.length > defineVal.maxUsernameLength) {
         //save msg to db of sender
         messMng.saveMessTxtSender(client.username, userGetMess, messContent);
@@ -948,6 +978,7 @@ io.on('connection', function (client) {
         //save msg to db of giver
         messMng.saveMessTxtGiver(userGetMess, userSentMess, messContent);
       }
+
     }
 
     var messFeedback = {
@@ -977,13 +1008,13 @@ io.on('connection', function (client) {
     if (userSentMess.length > defineVal.maxUsernameLength) {
       if (findGuestSocketId(userSentMess)) {
         //guest exits => do nothing
-      } else {        
+      } else {
         //add guest identify to global arry
         let guestName = updateMyGuesttsList(userSentMess);
 
         //check guest is exits in guetsList of admin
         let checkExitsGuest = guestManage.checkExitsGuest(userGetMess, userSentMess);
-        
+
         checkExitsGuest.then(checkResult => {
           if (checkResult == guestManage.guestNotExits) {
             //add new guest to guetsList of admin
@@ -991,13 +1022,13 @@ io.on('connection', function (client) {
           }
         })
       }
-      
+
     }
   }
-  
+
   function getGuestList() {
     let guestsListObj = guestManage.getGuestsList(client.username);
-    let    tempList = [];
+    let tempList = [];
     guestsListObj.then(result => {
       if (result.resultType === true) {
         let data = result.resultContent;
@@ -1040,11 +1071,14 @@ io.on('connection', function (client) {
 
   //-------------------------------------------------------
 
+
   client.on('disconnect', function () {
     //alert friend you are online
     alertFriendMyStatus(offlineStatus);
     delTempImg();
     deleteSockId(client.username);
+    deleteGuestSockId(client.guestIdentify);
+
     client.username = null;
     console.log('a client disconnected');
 

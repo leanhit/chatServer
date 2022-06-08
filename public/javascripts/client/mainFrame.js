@@ -128,14 +128,15 @@ socket.on("changeRelationshipResult", function (friendAnswer) {
 function addMessage(body, mess, side) {
   //create table of mess
   var tbl = addTbl('60%', side);
+  
   var tbdy = document.createElement('tbody');
   if (side === "right") {
     for (var i = 0; i < 2; i++) {
       var tr = document.createElement('tr');
       for (var j = 0; j < 2; j++) {
         if (i == 0 && j == 1) {        //avatar of chatter if readed cell          
-          let imgCell = addImgCell(tr, boxChatOf, sizeAvatarChat);
-          imgCell.colSpan = '2';
+          let imgCell = addImgCell(tr, socket.username, sizeAvatarChat);
+          imgCell.rowSpan = '2';
 
         } else if (i == 0 && j == 0) {//content cell
           //give pic
@@ -146,8 +147,8 @@ function addMessage(body, mess, side) {
             });
           } else {//text
             var tdText = addTextCell(tr, mess.messContent, sizeFontChat);
+            tdText.style.color= "blue";
             tdText.style.float = side;
-
           }
         } else if (i == 1 && j == 0) {//time cell
           var td = addTextCell(tr, mess.created, sizeFontTime);
@@ -162,26 +163,28 @@ function addMessage(body, mess, side) {
   } else {
     for (var i = 0; i < 2; i++) {
       var tr = document.createElement('tr');
+      
       for (var j = 0; j < 2; j++) {
         if (i == 0 && j == 0) {        //avatar of chatter if readed cell          
           let imgCell = addImgCell(tr, boxChatOf, sizeAvatarChat);
-          imgCell.colSpan = '2';
+          imgCell.rowSpan='2';
 
         } else if (i == 0 && j == 1) {//content cell
           //give pic
           if (mess.messType) {
             mess.messContent.forEach(imgUrl => {
               let tdImg = addImgCell(tr, imgPath + imgUrl, sizeImgChat);
-              tdImg.style.float = side;
+              tdImg.style.float= side;
             });
           } else {//text
             var tdText = addTextCell(tr, mess.messContent, sizeFontChat);
-            //tdText.style.float = side;
-
+            tdText.style.color= "rebeccapurple";
+            
+            
           }
         } else if (i == 1 && j == 1) {//time cell
           var td = addTextCell(tr, mess.created, sizeFontTime);
-          td.style.float = side;
+          td.style.textAlign= side;
 
         } else { //empty cell
 
@@ -200,9 +203,7 @@ function addaMessToWindow(mess, showType) {
   var messageTo = mess.userGetMess;
   var members = [];
 
-  let isGuestMess = isGuestMessage(userSend, messageTo);
-
-  if (isGuestMess) {
+  if (isChatWithGuest) {
     showGuestMessage(mess);
   } else {
     if (messageTo.length > maxUsernameLength) { //message send to room
@@ -253,35 +254,6 @@ function addaMessToWindow(mess, showType) {
   }
 }
 
-function isGuestMessage(userGetMess, userSendMess) {
-  let longName = "";
-  let shortName = "";
-  let isGuestMess = true;
-
-  if (userGetMess.length > maxUsernameLength) {
-    longName = userGetMess;
-    shortName = userSendMess;
-  } else if (userSendMess.length > maxUsernameLength) {
-    longName = userSendMess;
-    shortName = userGetMess;
-  } else {
-    isGuestMess = false;
-  }
-
-  console.log(isGuestMess, userGetMess, userSendMess);
-
-  if (isGuestMess) {
-    let tempArr = longName.split('_');
-    if ((tempArr.length == 3) && (tempArr[1] == "hoingx")) {
-      isGuestMess = true;
-    } else {
-      isGuestMess = false;
-    }
-  }
-
-  return isGuestMess;
-
-}
 
 //clear chat box
 function clearChatBox() {
@@ -328,7 +300,11 @@ socket.on('message', function (msg) {
 function delMess() {
   if (confirm("Delete this user?")) {
     //delete all mess of an user
-    socket.emit('deleteMessOf', boxChatOf)
+    socket.emit('deleteMessOf', {
+      userType: isChatWithGuest,
+      userId :boxChatOf
+    })
+
     socket.on('deleteMess', function (result) {
       if (result == 'ok') {
 
@@ -407,8 +383,6 @@ function sendMessage() {
       messContent: messContent,
       userGetMess: boxChatOf
     };
-
-    console.log(mess)
 
     if (isChatWithGuest)
       socket.emit('guestMessage', mess);

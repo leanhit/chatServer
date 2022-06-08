@@ -35,6 +35,7 @@ function addNewGuest(usname, guestIdentify, guestName) {
 }
 
 function updateGuestList(usname, commandType, guestIdentify) {
+    console.log(usname, commandType, guestIdentify);
     MongoClient.connect(defineVal.baseUrl, function (err, db) {
         if (err) {
             throw err;
@@ -43,11 +44,10 @@ function updateGuestList(usname, commandType, guestIdentify) {
             var dbo = db.db(dbName);
             switch (commandType) {
                 case deleteGuest: //delete commandType = 2
-                    dbo.collection(defineVal.guestsListColection).deleteOne({ guestID: guestIdentify }, function (err, res) {
+                    dbo.collection(defineVal.guestsListColection).deleteOne({ guestID: guestIdentify }, function (err) {
                         if (err) throw err;
                         else {
                             console.log("1 guest of " + usname + " deleted");
-
                             db.close();
                         }
                     });
@@ -56,7 +56,7 @@ function updateGuestList(usname, commandType, guestIdentify) {
 
                 case updateGuest: //update alert status
                     dbo.collection(defineVal.guestsListColection).findOneAndUpdate({ guestID: guestIdentify }, 
-                        { $set: { lastChat: dateTimeNow() } }, function (err, res) {
+                        { $set: { lastChat: new Date() } }, function (err, res) {
                         if (err) throw err;
                         else {
                             console.log("1 guest document updated");
