@@ -22,6 +22,29 @@ function validMobieNumber(mobieNumber) {
   }
 }
 
+function getBrowserName() {
+  var Browser = navigator.userAgent;
+  if (Browser.indexOf('MSIE') >= 0) {
+    Browser = 'MSIE';
+  }
+  else if (Browser.indexOf('Firefox') >= 0) {
+    Browser = 'Firefox';
+  }
+  else if (Browser.indexOf('Chrome') >= 0) {
+    Browser = 'Chrome';
+  }
+  else if (Browser.indexOf('Safari') >= 0) {
+    Browser = 'Safari';
+  }
+  else if (Browser.indexOf('Opera') >= 0) {
+    Browser = 'Opera';
+  }
+  else {
+    Browser = 'UNKNOWN';
+  }
+  return Browser;
+}
+
 function getLocalIp() {
   return new Promise((resolve) => {
     /* Add "https://api.ipify.org?format=json" statement
@@ -39,8 +62,8 @@ function getLocalIp() {
 function setupGuestUser() {
   boxChatOf = currentAdmin;
   $("#inAdminUsername").val(boxChatOf);
-
   const hostName = window.location.host;
+  let browserName = getBrowserName();
   let ipObj = getLocalIp();
 
   if (1)/*(hostName === rentHost)*/ {
@@ -51,9 +74,9 @@ function setupGuestUser() {
         id += temp;
       });
 
-      guestId = prefix + currentAdmin + "_" + id;
+      guestId = prefix + currentAdmin + "_" + id + "_" + browserName;
 
-      loginACK("Guest_"+id);
+      loginACK("Guest_" + id + "_" + browserName);
     });
 
   }
@@ -108,9 +131,9 @@ function enterPress(event) {
   }
 }
 
-function loginACK(guestName){
+function loginACK(guestName) {
   let messContent = guestName + " have been log in!!!";
-  let messType=false;
+  let messType = false;
   var mess = {
     sender: guestId,
     messType: messType,
@@ -178,10 +201,10 @@ function addaMessToWindow(mess) {
 
   var body = document.getElementById("messages");
   //set position of form        
-  if (userSend.length >maxUsernameLength) {//yourselt
+  if (userSend.length > maxUsernameLength) {//yourselt
     //create table of mess
     addMessage(body, mess, "right");
-  }else{//admin
+  } else {//admin
     //create table of mess
     addMessage(body, mess, "left");
   }
@@ -199,19 +222,19 @@ function addMessage(body, mess, side) {
     for (var i = 0; i < 2; i++) {
       var tr = document.createElement('tr');
       for (var j = 0; j < 2; j++) {
-        if (i == 0 && j == 1) {      
-          
+        if (i == 0 && j == 1) {
+
         } else if (i == 0 && j == 0) {//content cell
           //give pic
           if (mess.messType) {
-            mess.messContent.forEach(imgUrl=>{
+            mess.messContent.forEach(imgUrl => {
               let tdImg = addImgCell(tr, imgPath + imgUrl, sizeImgChat);
               tdImg.style.float = side;
             });
           } else {//text
             var tdText = addTextCell(tr, mess.messContent, sizeFontChat);
             tdText.style.float = side;
-            tdText.style.color= "blue"
+            tdText.style.color = "blue"
           }
         } else if (i == 1 && j == 0) {//time cell
 
@@ -225,12 +248,12 @@ function addMessage(body, mess, side) {
     for (var i = 0; i < 2; i++) {
       var tr = document.createElement('tr');
       for (var j = 0; j < 2; j++) {
-        if (i == 0 && j == 0) { 
+        if (i == 0 && j == 0) {
 
         } else if (i == 0 && j == 1) {//content cell
           //give pic
           if (mess.messType) {
-            mess.messContent.forEach(imgUrl=>{
+            mess.messContent.forEach(imgUrl => {
               let tdImg = addImgCell(tr, imgPath + imgUrl, sizeImgChat);
               tdImg.style.float = side;
             });

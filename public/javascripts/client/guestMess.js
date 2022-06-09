@@ -17,7 +17,7 @@ function showGuestList() {
 
 function selectTab(index) {
   let elementArray = document.getElementsByClassName("tabListChater");
-  for (var i = 0; i < elementArray; i++) {
+  for (var i = 0; i < elementArray.length; i++) {
     elementArray[i].getElementsByClassName.color = 'white';
     if (index == i) {
       elementArray[i].getElementsByClassName.color = 'blue';

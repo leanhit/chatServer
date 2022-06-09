@@ -902,7 +902,7 @@ io.on('connection', function (client) {
   function makeGuestName(guestIdentify) {
     let tempArray = guestIdentify.split('_');
 
-    let guestName = "Guest_" + tempArray[2];
+    let guestName = "Guest_" + tempArray[2]+"_"+tempArray[3];
     return guestName;
   }
 
