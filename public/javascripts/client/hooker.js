@@ -1,5 +1,5 @@
 var socket = io.connect(domainName);
-const prefix = "guestOf_";
+let guestIp = "";
 const rentHost = "localhost:8888";
 let guestId = "";
 
@@ -68,6 +68,15 @@ function getPhoneNumber() {
 
 function setupGuestUser() {
   boxChatOf = currentAdmin;
+  let ipObj = getLocalIp();
+
+  ipObj.then(ip => {
+    let tempArray = ip.split('.');
+    tempArray.forEach(temp => {
+      guestIp += temp;
+    });
+    guestIp += "_";
+  });
 }
 
 function setupGuestUser1() {
@@ -85,8 +94,7 @@ function setupGuestUser1() {
         id += temp;
       });
 
-      guestId = prefix + currentAdmin + "_" + id + "_" + browserName;
-
+      guestId = guestIp + currentAdmin + "_" + id + "_" + browserName;
       loginACK("Guest_" + id + "_" + browserName);
     });
 
@@ -163,7 +171,7 @@ function sendMessage() {
 
   if (phoneNumber) {
     enterPlease(true, inPhoneNb);
-    guestId = prefix + currentAdmin + "_" + phoneNumber;
+    guestId = guestIp + currentAdmin + "_" + phoneNumber;
     if (boxChatOf !== null) {
       let messType;
       let messContent;

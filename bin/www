@@ -898,6 +898,15 @@ io.on('connection', function (client) {
     client.to(socketId).emit('endTheCallCome', endCallObj);
   });
 
+
+
+
+
+
+
+
+
+
   //====================functions of message from guest==========================
   function makeGuestName(guestIdentify) {
     let tempArray = guestIdentify.split('_');
@@ -948,6 +957,7 @@ io.on('connection', function (client) {
   }
 
   client.on("guestMessage", messObj => {
+    console.log(messObj)
     updateGuesttsList(messObj.sender, messObj.userGetMess);
     processGuestMessage(messObj);
   });

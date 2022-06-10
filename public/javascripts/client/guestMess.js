@@ -2,7 +2,7 @@ function showChatList() {
   isChatWithGuest = false;
   let body = document.getElementById("ulChatlistView");
   body.innerHTML = "";
-  selectTab(1)
+  selectTab(1);
   refreshData();
 }
 
@@ -11,7 +11,7 @@ function showGuestList() {
   isChatWithGuest = true;
   let body = document.getElementById("ulChatlistView");
   body.innerHTML = "";
-  selectTab(0)
+  selectTab(0);
   getGuestsList();
 }
 
@@ -25,6 +25,7 @@ function selectTab(index) {
     }
   }
 }
+
 function getGuestsList() {
   setTimeout(function () {
     socket.emit("getGuestsList");
@@ -32,6 +33,7 @@ function getGuestsList() {
 }
 
 socket.on("getGuestsListResult", (data) => {
+  console.log(myListChat)
   //copy data to myChatList
   myListChat = data;
   
