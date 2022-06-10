@@ -1,8 +1,6 @@
 var socket = io.connect(domainName);
 const prefix = "guestOf_";
 const rentHost = "localhost:8888";
-
-
 let guestId = "";
 
 window.onload = function () {
@@ -59,9 +57,22 @@ function getLocalIp() {
   });
 }
 
+function getPhoneNumber() {
+  let phoneNumber = $("#inPhoneNumber").val();
+  if (validMobieNumber(phoneNumber)) {
+    return phoneNumber;
+  } else
+    return false
+}
+
+
 function setupGuestUser() {
   boxChatOf = currentAdmin;
-  $("#inAdminUsername").val(boxChatOf);
+}
+
+function setupGuestUser1() {
+  boxChatOf = currentAdmin;
+
   const hostName = window.location.host;
   let browserName = getBrowserName();
   let ipObj = getLocalIp();
@@ -145,31 +156,62 @@ function loginACK(guestName) {
 }
 
 function sendMessage() {
-  if (boxChatOf !== null) {
-    let input = document.getElementById("inputMessage");
-    let messType;
-    let messContent;
-    if (input.value) {
-      messType = false;
-      messContent = input.value;
-    } else if (imgArrayToSend.length) {
-      messType = true;
-      messContent = imgArrayToSend;
+  let isOk = false;
+  let phoneNumber = getPhoneNumber();
+  let inPhoneNb = document.getElementById("inPhoneNumber");
+  let inMessage = document.getElementById("inputMessage");
+
+  if (phoneNumber) {
+    enterPlease(true, inPhoneNb);
+    guestId = prefix + currentAdmin + "_" + phoneNumber;
+    if (boxChatOf !== null) {
+      let messType;
+      let messContent;
+      if (imgArrayToSend.length) {
+        isOk = true;
+        messType = true;
+        messContent = imgArrayToSend;
+      } else {
+        if (inMessage.value?.length > 0) {
+          isOk = true;
+          messType = false;
+          messContent = inMessage.value;
+          enterPlease(true, inMessage);
+        } else {
+          isOk = false;
+          enterPlease(false, inMessage);
+        }
+      }
+
+      if (isOk) {
+        var mess = {
+          sender: guestId,
+          messType: messType,
+          messContent: messContent,
+          userGetMess: boxChatOf
+        };
+
+        socket.emit('guestMessage', mess);
+      }
+
+      cleanInputMess(inMessage);
     }
-
-    var mess = {
-      sender: guestId,
-      messType: messType,
-      messContent: messContent,
-      userGetMess: boxChatOf
-    };
-
-    socket.emit('guestMessage', mess);
-
-    cleanInputMess(input);
+  } else {
+    alert("Hãy nhập số điện thoại");
+    enterPlease(true, inPhoneNb);
   }
 }
 
+function enterPlease(isCommand, inputElement) {
+  if (isCommand) {
+    inputElement.style.border = "0";
+
+  } else {
+    inputElement.style.border = "2";
+    inputElement.style.borderBlockColor = "red";
+    inputElement.focus();
+  }
+}
 function cleanInputMess(input) {
   //clear imgArrayToSend aftersend it
   if (imgArrayToSend.length) {
@@ -212,7 +254,6 @@ function addaMessToWindow(mess) {
   //scroll screen
   $('#messages').animate({ scrollTop: $('#messages').prop("scrollHeight") }, 500);
 }
-
 
 function addMessage(body, mess, side) {
   //create table of mess
